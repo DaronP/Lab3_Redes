@@ -5,7 +5,7 @@ Jorge Andres Perez Barrios
 Carnet: 16362
 '''
 
-
+from argparse import ArgumentParser
 from slixmpp import ClientXMPP, clientxmpp
 import sys
 import logging
@@ -14,7 +14,10 @@ import asyncio
 import slixmpp
 from slixmpp.exceptions import IqError, IqTimeout
 from xml.etree import ElementTree as ET
+import aioconsole
+from aioconsole import ainput, aprint
 
+loop = asyncio.get_event_loop()
 
 
 if sys.platform == 'win32':
@@ -107,9 +110,9 @@ class Client(ClientXMPP):
 	#Funcion que recibe mensajes, tanto personales como grupales
 	def receive(self, msg):
 		if msg['type'] == 'chat' or msg['type'] == 'normal':
-			print("***********Mensaje Recibido**************")
-			print("De: %(from)s \n %(body)s" %(msg))
-			print("*****************************************")
+			aprint("***********Mensaje Recibido**************")
+			aprint("De: %(from)s \n %(body)s" %(msg))
+			aprint("*****************************************")
 			msg.reply("Mensaje %(body)s enviado correctamente" % msg['body'])
 
 			mens = msg['body'].split("/")
@@ -125,23 +128,26 @@ class Client(ClientXMPP):
 
 
 		if msg['type'] == 'groupchat':
-			print("***********Mensaje grupal Recibido**************")
-			print("De: %(from)s \n %(body)s" %(msg))
-			print("************************************************")
+			aprint("***********Mensaje grupal Recibido**************")
+			aprint("De: %(from)s \n %(body)s" %(msg))
+			aprint("************************************************")
 			msg.reply("Mensaje %(body)s enviado correctamente" % msg['body'])
 
 	#Inicio: menu asincrono con asyncio
 	async def session_start(self, event):
 		self.send_presence()
 		await self.get_roster()
-		
+		ioi = await ainput("wdasdwadaw")
+		self.send_message(mto=ioi + "@alumchat.xyz", mbody="holis", mtype='chat')
 		chat = True
 		while chat:
 			#if self.node['rec'] == True and self.node['nodo'] != self.node['nodo_fuente'] or self.node['nodo'] != self.node['nodo_destino'] and not self.node['sent']:
-			alg = input("Ingrese el algoritmo que desea ejecutar: 1. Flooding 2. Distance Vector Routing 3. ")
+			alg = await ainput("Ingrese el algoritmo que desea ejecutar: 1. Flooding 2. Distance Vector Routing 3. ")
 
 			if alg == "1":
 				for i in self.node['listado_nodos']:
+					if not self.node['mensaje']:
+						self.node['mensaje'] = await ainput("Ingrese el mensaje a enviar")
 					self.send_message(mto=i + "@alumchat.xyz", mbody=self.node['mensaje'], mtype='chat')
 					self.node['sent'] == True
 
@@ -154,9 +160,24 @@ class Client(ClientXMPP):
 			
 
 			else:
-				print("Seleccion incorrecta")
+				aprint("Seleccion incorrecta")
+
+
 
 if __name__ == '__main__':
+
+	parser = ArgumentParser(description=Client.__doc__)
+
+	# Output verbosity options.
+	parser.add_argument("-q", "--quiet", help="set logging to ERROR", action="store_const", dest="loglevel",
+	const=logging.ERROR, default=logging.INFO)
+
+	parser.add_argument("-d", "--debug", help="set logging to DEBUG", action="store_const", dest="loglevel",
+	const=logging.DEBUG, default=logging.INFO)
+
+	logging.basicConfig(level=logging.DEBUG,
+						format='%(levelname)-8s %(message)s')
+	args = parser.parse_args()
 
 	run = True
 
@@ -167,17 +188,18 @@ if __name__ == '__main__':
 			jid = jid + '@alumchat.xyz'
 			password = getpass.getpass("Password: ")
 
-			node_count = input("Ingrese el numero de nodos conectados a este")
+			node_count = input("Ingrese el numero de nodos conectados a este ")
 			node_list =[]
 
-			for i in range(node_count - 1):
-				node = input("Ingrese el nombre del nodo ", i)
+			for i in range(int(node_count)):
+				node = input("Ingrese el nombre del nodo " + str(i) + " ")
 				node_list.append(node)
 
 			xmpp = Client(jid=jid, password=password, nodo=jid, listado_nodos=node_list)
-				
+			xmpp['feature_mechanisms'].unencrypted_plain = True	
 			if xmpp.connect() == None:
-				xmpp.process()
+				
+				loop.run_until_complete(xmpp.process())
 				
 			else:
 				print("Error al conectarse")
