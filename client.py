@@ -144,7 +144,8 @@ class Client(ClientXMPP):
 					for i in self.node['listado_nodos']:
 						self.node['distancia'] = self.node['distancia'] + int(i.split(" ")[-1])
 						self.send_message(mto=i.split(" ")[0] + "@alumchat.xyz", mbody="n_f: " + self.node['nodo_fuente'] + "/n_d: " + self.node['nodo_destino'] + "/s: " + str(self.node['saltos']) +"/d: "+ str(self.node['distancia']) +"/m: " + self.node['mensaje'] + "/alg: " + self.node['alg'], mtype='chat')
-			
+
+				# Algoritmo Distance Vector Routing en el lado de los nodos receptores
 				if self.node['alg'] == "2":
 					dist_list = list()
 					for i in self.node['listado_nodos']:
@@ -185,6 +186,7 @@ class Client(ClientXMPP):
 				for i in self.node['listado_nodos']:
 					self.send_message(mto=i.split(" ")[0] + "@alumchat.xyz", mbody=mnsg, mtype='chat')
 			
+			#Algoritmo Distance Vector Routing en el lado del nodo fuente
 			if alg == "2":
 					dist_list = list()
 					for i in self.node['listado_nodos']:
