@@ -3,6 +3,9 @@ Universidad del Valle de Guatemala
 Redes
 Jorge Andres Perez Barrios
 Carnet: 16362
+
+Cristopher Jose Rodolfo Barrios Solis 
+Carnet: 18207
 '''
 
 from argparse import ArgumentParser
