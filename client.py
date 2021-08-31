@@ -153,7 +153,7 @@ class Client(ClientXMPP):
 					
 					res = dist_list.index(min(dist_list))
 					
-					self.node['distancia'] = self.node['distancia'] + int(self.node['listado_nodos'].split(" ")[-1])
+					self.node['distancia'] = self.node['distancia'] + int(self.node['listado_nodos'][res].split(" ")[-1])
 					self.send_message(mto=self.node['listado_nodos'][res].split(" ")[0] + "@alumchat.xyz", mbody="n_f: " + self.node['nodo_fuente'] + "/n_d: " + self.node['nodo_destino'] + "/s: " + str(self.node['saltos']) +"/d: "+ str(self.node['distancia']) +"/m: " + self.node['mensaje'] + "/alg: " + self.node['alg'], mtype='chat')
 
 			
@@ -207,7 +207,7 @@ class Client(ClientXMPP):
 			
 
 			else:
-				aprint("Seleccion incorrecta")
+				await aprint("Seleccion incorrecta")
 
 
 
