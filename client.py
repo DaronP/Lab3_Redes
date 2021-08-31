@@ -79,10 +79,10 @@ class Client(ClientXMPP):
 		ClientXMPP.__init__(self, jid, password)
 		self.jid = jid
 		self.password = password
-		self.node = {'nodo': nodo, 'nodo_fuente': "", 'nodo_destino': "", 'saltos': 0, 'distancia': 0, 'mensaje': "", 'listado_nodos': listado_nodos, 'rec': False, 'sent': False}
+		self.node = {'nodo': nodo, 'nodo_fuente': "", 'nodo_destino': "", 'saltos': 0, 'distancia': 0, 'mensaje': "", 'listado_nodos': listado_nodos, 'rec': False, 'sent': False, 'alg': 0}
 
 		self.add_event_handler('session_start', self.session_start)
-		self.add_event_handler('receive_message', self.receive)
+		self.add_event_handler('message', self.message)
 
 		self.register_plugin('xep_0030') # Service Discovery		
 		self.register_plugin('xep_0045') # Multi-User Chat
@@ -90,7 +90,6 @@ class Client(ClientXMPP):
 		self.register_plugin('xep_0060')
 		self.register_plugin('xep_0199') # Ping
 
-		self.received = set()
 		self.presences_received = asyncio.Event()
 
 	'''
@@ -108,39 +107,40 @@ class Client(ClientXMPP):
 	'''
 
 	#Funcion que recibe mensajes, tanto personales como grupales
-	def receive(self, msg):
+	def message(self, msg):
 		if msg['type'] == 'chat' or msg['type'] == 'normal':
-			aprint("***********Mensaje Recibido**************")
-			aprint("De: %(from)s \n %(body)s" %(msg))
-			aprint("*****************************************")
-			msg.reply("Mensaje %(body)s enviado correctamente" % msg['body'])
+			print("***********Mensaje Recibido**************")
+			print("De: %(from)s \n %(body)s" %(msg))
+			print("*****************************************")
 
 			mens = msg['body'].split("/")
 
-			self.node['nodo_fuente'] = int(mens[0].split(": ")[1])
-			self.node['nodo_destino'] = int( mens[1].split(": ")[1])
-			self.node['saltos'] = int(mens[2].split(": ")[1])
-			self.node['distancia'] = int(mens[3].split(": ")[1])
-			self.node['mensaje'] = mens[4].split(": ")[1]
+			self.node['nodo_fuente'] = mens[0].split(": ")[-1]
+			self.node['nodo_destino'] = mens[1].split(": ")[-1]
+			self.node['saltos'] = int(mens[2].split(": ")[-1])
+			self.node['distancia'] = int(mens[3].split(": ")[-1])
+			self.node['mensaje'] = mens[4].split(": ")[-1]
 			self.node['rec'] = True
+
+			print(self.node)
 
 
 
 
 		if msg['type'] == 'groupchat':
-			aprint("***********Mensaje grupal Recibido**************")
-			aprint("De: %(from)s \n %(body)s" %(msg))
-			aprint("************************************************")
-			msg.reply("Mensaje %(body)s enviado correctamente" % msg['body'])
+			print("\n\n***********Mensaje grupal Recibido**************")
+			print("De: %(from)s \n%(body)s" %(msg))
+			print("************************************************\n\n")
 
 	#Inicio: menu asincrono con asyncio
 	async def session_start(self, event):
 		self.send_presence()
 		await self.get_roster()
 		ioi = await ainput("wdasdwadaw")
-		self.send_message(mto=ioi + "@alumchat.xyz", mbody="holis", mtype='chat')
+		self.send_message(mto=ioi + "@alumchat.xyz", mbody="n_f: G/n_d: A/s: 2/d: 3/m: Hola mundo", mtype='chat')
 		chat = True
 		while chat:
+			
 			#if self.node['rec'] == True and self.node['nodo'] != self.node['nodo_fuente'] or self.node['nodo'] != self.node['nodo_destino'] and not self.node['sent']:
 			alg = await ainput("Ingrese el algoritmo que desea ejecutar: 1. Flooding 2. Distance Vector Routing 3. ")
 
@@ -153,7 +153,7 @@ class Client(ClientXMPP):
 
 			
 			#8. Desconectarse
-			if opcion == "8":
+			if alg == "8":
 				chat = False
 				self.disconnect()
 				sys.exit()
@@ -165,7 +165,7 @@ class Client(ClientXMPP):
 
 
 if __name__ == '__main__':
-
+	
 	parser = ArgumentParser(description=Client.__doc__)
 
 	# Output verbosity options.
