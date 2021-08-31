@@ -99,11 +99,12 @@ class Client(ClientXMPP):
 	s: saltos
 	d: distancia
 	m: mensaje
+	alg: algoritmo
 
 	Cada linea del mensaje debe de estar separada por un slash "/".
 	
 	Ejemplo de un mensaje:
-	n_f: G/n_d: A/s: 2/d: 3/m: Hola mundo
+	n_f: G/n_d: A/s: 2/d: 3/m: Hola mundo/alg: 1
 	'''
 
 	#Funcion que recibe mensajes, tanto personales como grupales
@@ -114,6 +115,7 @@ class Client(ClientXMPP):
 			print("*****************************************")
 
 			mens = msg['body'].split("/")
+			
 
 			self.node['nodo_fuente'] = mens[0].split(": ")[-1]
 			self.node['nodo_destino'] = mens[1].split(": ")[-1]
@@ -121,9 +123,25 @@ class Client(ClientXMPP):
 			self.node['distancia'] = int(mens[3].split(": ")[-1])
 			self.node['mensaje'] = mens[4].split(": ")[-1]
 			self.node['rec'] = True
+			self.node['alg'] = mens[5].split(": ")[-1]
+			
+			#Aqui van los algoritmos
+			#1 = Flooding
+			#2 = Distance Vector Routing
+			#3 = 
 
-			print(self.node)
+			if (self.node['nodo_destino'] + "@alumchat.xyz") != self.node['nodo']:
+				self.node['saltos'] += 1
+				self.node['distancia'] += 1
 
+				#Algoritmo Flooding en el lado de los nodos receptores
+				if self.node['alg'] == "1":
+					for i in self.node['listado_nodos']:
+						self.send_message(mto=i + "@alumchat.xyz", mbody="n_f: " + self.node['nodo_fuente'] + "/n_d: " + self.node['nodo_destino'] + "/s: " + self.node['saltos'] +"/d: "+ self.node['distancia'] +"/m: " + self.node['mensaje'] + "/alg: " + self.node['alg'], mtype='chat')
+						self.node['sent'] == True
+			
+			else:
+				print("\n\nMensaje recibido de: " + self.node['nodo_fuente'] + "\nMensaje: " + self.node['mensaje'] + "\n\n")
 
 
 
@@ -136,19 +154,20 @@ class Client(ClientXMPP):
 	async def session_start(self, event):
 		self.send_presence()
 		await self.get_roster()
-		ioi = await ainput("wdasdwadaw")
-		self.send_message(mto=ioi + "@alumchat.xyz", mbody="n_f: G/n_d: A/s: 2/d: 3/m: Hola mundo", mtype='chat')
+		
 		chat = True
-		while chat:
+		while chat:			
 			
-			#if self.node['rec'] == True and self.node['nodo'] != self.node['nodo_fuente'] or self.node['nodo'] != self.node['nodo_destino'] and not self.node['sent']:
+			nd = await ainput("Ingrese el nodo destino")
+			mensaj = await ainput("Ingrese el mensaje")
 			alg = await ainput("Ingrese el algoritmo que desea ejecutar: 1. Flooding 2. Distance Vector Routing 3. ")
 
+			mnsg = "n_f: " + self.boundjid.bare + "/n_d: " + nd + "/s: 1/d: 0/m: " + mensaj + "/alg: " + alg
+			
+			#Algoritmo Flooding en el lado del nodo fuente
 			if alg == "1":
 				for i in self.node['listado_nodos']:
-					if not self.node['mensaje']:
-						self.node['mensaje'] = await ainput("Ingrese el mensaje a enviar")
-					self.send_message(mto=i + "@alumchat.xyz", mbody=self.node['mensaje'], mtype='chat')
+					self.send_message(mto=i + "@alumchat.xyz", mbody=mnsg, mtype='chat')
 					self.node['sent'] == True
 
 			
