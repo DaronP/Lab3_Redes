@@ -4,6 +4,9 @@ Redes
 Jorge Andres Perez Barrios
 Carnet: 16362
 
+Andrea Maria Paniagua Acevedo
+Carnet: 18733
+
 Cristopher Jose Rodolfo Barrios Solis 
 Carnet: 18207
 '''
@@ -32,8 +35,8 @@ class SignUp(slixmpp.ClientXMPP):
 	def __init__(self, jid, password):
 		ClientXMPP.__init__(self, jid, password)
 
-		self.add_event_handler("session_start", self.start)
-		self.add_event_handler("register", self.register)
+		self.add_event_handler("session_start ", self.start)
+		self.add_event_handler("register ", self.register)
 
 	async def start(self, event):
 		self.send_presence()
@@ -48,11 +51,11 @@ class SignUp(slixmpp.ClientXMPP):
 		resp['register']['password'] = self.password
 		try:
 			await resp.send()
-			print("Account created for %s!" % self.boundjid)
+			print("Account created for %s! " % self.boundjid)
 			self.disconnect()
 
 		except IqError as e:
-			print("Could not register account: %s" %
+			print("Could not register account: %s " %
 					e.iq['error']['text'])
 			self.disconnect()
 			
@@ -120,13 +123,13 @@ class Client(ClientXMPP):
 			mens = msg['body'].split("/")
 			
 
-			self.node['nodo_fuente'] = mens[0].split(": ")[-1]
-			self.node['nodo_destino'] = mens[1].split(": ")[-1]
-			self.node['saltos'] = int(mens[2].split(": ")[-1])
-			self.node['distancia'] = int(mens[3].split(": ")[-1])
-			self.node['mensaje'] = mens[4].split(": ")[-1]
-			self.node['rec'] = True
-			self.node['alg'] = mens[5].split(": ")[-1]
+			self.node['nodo_fuente '] = mens[0].split(": ")[-1]
+			self.node['nodo_destino '] = mens[1].split(": ")[-1]
+			self.node['saltos '] = int(mens[2].split(": ")[-1])
+			self.node['distancia '] = int(mens[3].split(": ")[-1])
+			self.node['mensaje '] = mens[4].split(": ")[-1]
+			self.node['rec '] = True
+			self.node['alg '] = mens[5].split(": ")[-1]
 			
 			#Aqui van los algoritmos
 			#1 = Flooding
@@ -161,8 +164,8 @@ class Client(ClientXMPP):
 		chat = True
 		while chat:			
 			
-			nd = await ainput("Ingrese el nodo destino")
-			mensaj = await ainput("Ingrese el mensaje")
+			nd = await ainput("Ingrese el nodo destino: ")
+			mensaj = await ainput("Ingrese el mensaje: ")
 			alg = await ainput("Ingrese el algoritmo que desea ejecutar: 1. Flooding 2. Distance Vector Routing 3. ")
 
 			mnsg = "n_f: " + self.boundjid.bare + "/n_d: " + nd + "/s: 1/d: 0/m: " + mensaj + "/alg: " + alg
@@ -210,7 +213,7 @@ if __name__ == '__main__':
 			jid = jid + '@alumchat.xyz'
 			password = getpass.getpass("Password: ")
 
-			node_count = input("Ingrese el numero de nodos conectados a este ")
+			node_count = input("Ingrese el numero de nodos conectados a este: ")
 			node_list =[]
 
 			for i in range(int(node_count)):
